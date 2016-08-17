@@ -75,11 +75,28 @@
             */
         }
 
+        function moveUp() {
+            myGamePiece.speedY -= 1;
+        }
 
+        function moveDown() {
+            myGamePiece.speedY += 1;
+        }
 
+        function moveLeft() {
+            myGamePiece.speedX -= 1;
+        }
 
-
+        function moveRight() {
+            myGamePiece.speedX += 1;
+        }
 
     </script>
+    <div style="text-align: center; width: 480px">
+        <button onclick="moveUp()">UP</button><br/>
+        <button onclick="moveLeft()">LEFT</button>
+        <button onclick="moveRight()">RIGHT</button><br/>
+        <button onclick="moveDown()">DOWN</button>
+    </div>
 </body>
 </html>
