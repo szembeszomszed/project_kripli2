@@ -17,7 +17,7 @@
         var myGamePiece;
 
         function startGame() {
-            myGamePiece = new component (10, 20, "blue", 10, 10);
+            myGamePiece = new component(30, 30, "blue", 10, 120);
             /*
             redGamePiece = new component(75, 75, "red", 10, 10);
             yellowGamePiece = new component(75, 75, "yellow", 50, 60); 
@@ -27,16 +27,23 @@
         }
 
         var myGameArea = {
-            canvas: document.createElement("canvas"),
+            canvas : document.createElement("canvas"),
             start : function() {
                 this.canvas.width = 480;
                 this.canvas.height = 270;
                 this.context = this.canvas.getContext("2d");
                 document.body.insertBefore(this.canvas, document.body.childNodes[0]);
                 this.interval = setInterval(updateGameArea, 20); //the component is drawn and cleared 50 times per second
+                window.addEventListener('keydown', function(e) {
+                    myGameArea.key = e.keyCode;
+                })
+                window.addEventListener('keyup', function(e) {
+                    myGameArea.key = false;
+                    stopMove(); // different from example
+                })
             },
             clear : function() {
-                this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+                this.context.clearRect(0, 0, this.canvas.width, this.canvas.height); //clearRect() method clears the specified pixels within a given rectangle
             }
         }
 
@@ -53,13 +60,32 @@
                 ctx.fillRect(this.x, this.y, this.width, this.height);
             }
             this.newPos = function() { // change components position
-                this.x = this.speedX;
-                this.y = this.speedY;
+                this.x += this.speedX;
+                this.y += this.speedY;
             }
         }
 
         function updateGameArea() {
             myGameArea.clear(); // without the clear() method, all movements of the component will leave a trail of where it was positioned in the last frame
+
+            if (myGameArea.key && myGameArea.key == 38) { 
+                moveUp(); // different from example
+            }
+
+            if (myGameArea.key && myGameArea.key == 40) { 
+                moveDown(); 
+            }
+
+            if (myGameArea.key && myGameArea.key == 37) { 
+                moveLeft(); 
+            }
+
+            if (myGameArea.key && myGameArea.key == 39) { 
+                moveRight(); 
+            }            
+
+
+
             myGamePiece.newPos(); // newPos() called before drawing the component
             myGamePiece.update();
 
@@ -76,27 +102,32 @@
         }
 
         function moveUp() {
-            myGamePiece.speedY -= 1;
+            myGamePiece.speedY = -1;
         }
 
         function moveDown() {
-            myGamePiece.speedY += 1;
+            myGamePiece.speedY = 1;
         }
 
         function moveLeft() {
-            myGamePiece.speedX -= 1;
+            myGamePiece.speedX = -1;
         }
 
         function moveRight() {
-            myGamePiece.speedX += 1;
+            myGamePiece.speedX = 1;
+        }
+
+        function stopMove() {
+            myGamePiece.speedX = 0;
+            myGamePiece.speedY = 0;
         }
 
     </script>
     <div style="text-align: center; width: 480px">
-        <button onclick="moveUp()">UP</button><br/>
-        <button onclick="moveLeft()">LEFT</button>
-        <button onclick="moveRight()">RIGHT</button><br/>
-        <button onclick="moveDown()">DOWN</button>
+        <button onmousedown="moveUp()" onmouseup="stopMove()" ontouchstart="moveUp()">UP</button><br/>
+        <button onmousedown="moveLeft()" onmouseup="stopMove()" ontouchstart="moveLeft()">LEFT</button>
+        <button onmousedown="moveRight()" onmouseup="stopMove()" ontouchstart="moveRight()">RIGHT</button><br/>
+        <button onmousedown="moveDown()" onmouseup="stopMove()" ontouchstart="moveDown()">DOWN</button>
     </div>
 </body>
 </html>
