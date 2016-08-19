@@ -15,14 +15,13 @@
     <script>
 
         var myGamePiece;
+        var myObstacles = [];
+        var myScore;
 
         function startGame() {
             myGamePiece = new component(30, 30, "blue", 10, 120);
-            /*
-            redGamePiece = new component(75, 75, "red", 10, 10);
-            yellowGamePiece = new component(75, 75, "yellow", 50, 60); 
-            blueGamePiece = new component(75, 75, "blue", 10, 110);
-            */
+            myScore = new component("20px", "Consolas", "black", 280, 40, "text");
+            //myObstacle = new component(10, 200, "green", 300, 120);
             myGameArea.start();
         }
 
@@ -33,6 +32,7 @@
                 this.canvas.height = 270;
                 this.context = this.canvas.getContext("2d");
                 document.body.insertBefore(this.canvas, document.body.childNodes[0]);
+                this.frameNo = 0; // a property for counting frames
                 this.interval = setInterval(updateGameArea, 20); //the component is drawn and cleared 50 times per second
                 window.addEventListener('keydown', function(e) {
                     myGameArea.key = e.keyCode;
@@ -44,29 +44,64 @@
             },
             clear : function() {
                 this.context.clearRect(0, 0, this.canvas.width, this.canvas.height); //clearRect() method clears the specified pixels within a given rectangle
+            },
+
+            stop : function() {
+                clearInterval(this.interval); // clears interval when called
             }
         }
 
-        function component(width, height, color, x, y) {
+        function component(width, height, color, x, y, type) {
             this.width = width;
             this.height = height;
             this.speedX = 0; // speed indicator
             this.speedY = 0; // speed indicator
             this.x = x;
             this.y = y;
+            this.type = type;
             this.update = function() {
                 ctx = myGameArea.context;
-                ctx.fillStyle = color;
-                ctx.fillRect(this.x, this.y, this.width, this.height);
+
+                // test if the component is of type "text", and use the fillText method instead of the fillRect method
+                if (this.type == "text") {
+                    ctx.font = this.width + " " + this.height;
+                    ctx.fillStyle = color;
+                    ctx.fillText(this.text, this.x, this.y);
+
+                } else {
+                    ctx.fillStyle = color;
+                    ctx.fillRect(this.x, this.y, this.width, this.height);
+                }
+
             }
+
             this.newPos = function() { // change components position
                 this.x += this.speedX;
                 this.y += this.speedY;
             }
+
+            this.crashWith = function(otherObj) {
+                var myLeft = this.x;
+                var myRight = this.x + (this.width);
+                var myTop = this.y;
+                var myBottom = this.y + (this.height);
+                var otherLeft = otherObj.x;
+                var otherRight = otherObj.x + (otherObj.width);
+                var otherTop = otherObj.y;
+                var otherBottom = otherObj.y + (otherObj.height);
+                var crash = true;
+
+                if ((myBottom < otherTop) || 
+                    (myTop > otherBottom) || 
+                    (myRight < otherLeft) ||
+                    (myLeft > otherRight)) {
+                    crash = false;
+                }
+                return crash;
+            }
         }
 
         function updateGameArea() {
-            myGameArea.clear(); // without the clear() method, all movements of the component will leave a trail of where it was positioned in the last frame
 
             if (myGameArea.key && myGameArea.key == 38) { 
                 moveUp(); // different from example
@@ -82,23 +117,58 @@
 
             if (myGameArea.key && myGameArea.key == 39) { 
                 moveRight(); 
-            }            
+            }
 
+            // define variables
+            var x, height, gap, minHeight, maxHeight, minGap, maxGap;
 
+            // loop through every obstacle to see if there is a crash
+            // If there is a crash, the updateGameArea function will stop, and no more drawing is done
+            for (i = 0; i < myObstacles.length; i++) {
+                if (myGamePiece.crashWith(myObstacles[i])) {
+                    myGameArea.stop();
+                    return;
+                }
+            }
 
+            // without the clear() method, all movements of the component will leave a trail of where it was positioned in the last frame
+            myGameArea.clear();
+
+            // count frames and add an obstacle for every 150th frame 
+            // obstacles of random sizes added
+            myGameArea.frameNo++;
+
+            if (myGameArea.frameNo == 1 || everyInterval(150)) {
+                x = myGameArea.canvas.width;
+                minHeight = 20;
+                maxHeight = 200;
+                height = Math.floor(Math.random() * (maxHeight - minHeight + 1) + minHeight);
+
+                minGap = 50;
+                maxGap = 200;
+                gap = Math.floor(Math.random() * (maxGap - minGap + 1) + minGap);
+
+                myObstacles.push(new component(10, height, "green", x, 0));
+                myObstacles.push(new component(10, x - height - gap, "green", x, height + gap));
+            }
+
+            for (i = 0; i < myObstacles.length; i++) {
+                myObstacles[i].speedX = -1;
+                myObstacles[i].newPos();
+                myObstacles[i].update();
+            }
+
+            myScore.text = "Pontszám: " + myGameArea.frameNo;
+            myScore.update();
             myGamePiece.newPos(); // newPos() called before drawing the component
             myGamePiece.update();
 
-            /*
-            redGamePiece.x += 1;
-            yellowGamePiece.x += 1;
-            yellowGamePiece.y += 1;
-            blueGamePiece.x += 1;
-            blueGamePiece.y += 1;
-            redGamePiece.update();
-            yellowGamePiece.update(); 
-            blueGamePiece.update();
-            */
+        }
+
+        // The everyInterval function returns true if the current framenumber corresponds with the given interval.
+        function everyInterval(n) {
+            if ((myGameArea.frameNo / n) % 1 == 0) {return true;}
+            return false;
         }
 
         function moveUp() {
@@ -121,6 +191,37 @@
             myGamePiece.speedX = 0;
             myGamePiece.speedY = 0;
         }
+
+        /*
+
+            // if crashWith returns true, the stop method is called
+            if (myGamePiece.crashWith(myObstacle)) {
+                
+                myGameArea.stop();
+
+            } else {
+
+                myGameArea.clear(); // without the clear() method, all movements of the component will leave a trail of where it was positioned in the last frame
+
+           
+
+                myObstacle.x -= 1; // moving obstacle at every update
+
+                myObstacle.update();
+                myGamePiece.newPos(); // newPos() called before drawing the component
+                myGamePiece.update();
+
+                
+                redGamePiece.x++;
+                yellowGamePiece.x++;
+                yellowGamePiece.y++;
+                blueGamePiece.x++;
+                blueGamePiece.y++;
+                redGamePiece.update();
+                yellowGamePiece.update(); 
+                blueGamePiece.update();
+                
+            }*/
 
     </script>
     <div style="text-align: center; width: 480px">
