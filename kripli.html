@@ -16,11 +16,13 @@
 
         var myGamePiece;
         var myObstacles = [];
+        var myBackground;
         var myScore;
 
         function startGame() {
-            myGamePiece = new component(30, 30, "blue", 10, 120);
+            myGamePiece = new component(30, 30, "img/man.png", 10, 120, "image");
             myScore = new component("20px", "Consolas", "black", 280, 40, "text");
+            myBackground = new component(480, 270, "img/freiburg1.jpg", 0, 0, "background");
             //myObstacle = new component(10, 200, "green", 300, 120);
             myGameArea.start();
         }
@@ -59,6 +61,12 @@
             this.x = x;
             this.y = y;
             this.type = type;
+
+            if(type == "image" || type == "background") {
+                this.image = new Image();
+                this.image.src = color;
+            }
+
             this.update = function() {
                 ctx = myGameArea.context;
 
@@ -68,6 +76,14 @@
                     ctx.fillStyle = color;
                     ctx.fillText(this.text, this.x, this.y);
 
+                } else if (type == "image" || type == "background") {
+                    ctx.drawImage(this.image, this.x, this.y, this.width, this. height);
+
+                    // add the background image twice, placing the second image immediately after the first image.
+                    if (type == "background") {
+                        ctx.drawImage(this.image, this.x + this.width, this.y, this.width, this.height);
+                    }
+                    
                 } else {
                     ctx.fillStyle = color;
                     ctx.fillRect(this.x, this.y, this.width, this.height);
@@ -78,6 +94,12 @@
             this.newPos = function() { // change components position
                 this.x += this.speedX;
                 this.y += this.speedY;
+                // check if the x position of the component has reach the end of the image, if it has, set the x position of the component to 0
+                if (this.type == "background") {
+                    if (this.x == -(this.width)) {
+                        this.x = 0;
+                    }
+                }
             }
 
             this.crashWith = function(otherObj) {
@@ -133,6 +155,11 @@
 
             // without the clear() method, all movements of the component will leave a trail of where it was positioned in the last frame
             myGameArea.clear();
+
+            //Change the background component's speedX property to make the background move
+            myBackground.speedX = -1;
+            myBackground.newPos();
+            myBackground.update();
 
             // count frames and add an obstacle for every 150th frame 
             // obstacles of random sizes added
