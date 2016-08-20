@@ -22,7 +22,7 @@
         function startGame() {
             myGamePiece = new component(30, 30, "img/man.png", 10, 120, "image");
             myScore = new component("20px", "Consolas", "black", 280, 40, "text");
-            myBackground = new component(480, 270, "img/freiburg1.jpg", 0, 0, "background");
+            //myBackground = new component(480, 270, "img/freiburg1.jpg", 0, 0, "background");
             //myObstacle = new component(10, 200, "green", 300, 120);
             myGameArea.start();
         }
@@ -35,6 +35,8 @@
                 this.context = this.canvas.getContext("2d");
                 document.body.insertBefore(this.canvas, document.body.childNodes[0]);
                 this.frameNo = 0; // a property for counting frames
+                this.oFreq = 150; // frequency of adding obstacles
+                this.oSpeedChange = -1; // speed of obstacles
                 this.interval = setInterval(updateGameArea, 20); //the component is drawn and cleared 50 times per second
                 window.addEventListener('keydown', function(e) {
                     myGameArea.key = e.keyCode;
@@ -79,7 +81,7 @@
                 } else if (type == "image" || type == "background") {
                     ctx.drawImage(this.image, this.x, this.y, this.width, this. height);
 
-                    // add the background image twice, placing the second image immediately after the first image.
+                    // add the background image one more time, placing the second image immediately after the first image.
                     if (type == "background") {
                         ctx.drawImage(this.image, this.x + this.width, this.y, this.width, this.height);
                     }
@@ -157,15 +159,22 @@
             myGameArea.clear();
 
             //Change the background component's speedX property to make the background move
-            myBackground.speedX = -1;
-            myBackground.newPos();
-            myBackground.update();
+            //myBackground.speedX = -1;
+            //myBackground.newPos();
+            //myBackground.update();
 
             // count frames and add an obstacle for every 150th frame 
             // obstacles of random sizes added
             myGameArea.frameNo++;
 
-            if (myGameArea.frameNo == 1 || everyInterval(150)) {
+            if (myGameArea.frameNo % 1000 == 1) {
+                console.log("frameNo % 500 == 1")
+                myGameArea.oFreq -= 20;
+                console.log("myGameArea.oFreq: " + myGameArea.oFreq);
+            }
+
+            if (myGameArea.frameNo == 1 || everyInterval(myGameArea.oFreq)) {
+                // with x defined like this, obstacles always start at the end of the canvas
                 x = myGameArea.canvas.width;
                 minHeight = 20;
                 maxHeight = 200;
@@ -178,9 +187,16 @@
                 myObstacles.push(new component(10, height, "green", x, 0));
                 myObstacles.push(new component(10, x - height - gap, "green", x, height + gap));
             }
+            
+            if (myGameArea.frameNo % 1000 == 1) {
+                myGameArea.oSpeedChange -= 0.5;
+                console.log("speed changed");
+            }
+            
+            
 
             for (i = 0; i < myObstacles.length; i++) {
-                myObstacles[i].speedX = -1;
+                myObstacles[i].speedX = myGameArea.oSpeedChange;
                 myObstacles[i].newPos();
                 myObstacles[i].update();
             }
