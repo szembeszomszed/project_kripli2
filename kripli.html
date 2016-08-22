@@ -3,15 +3,41 @@
 <head>
 
     <meta charset="utf-8" name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <link href="https://fonts.googleapis.com/css?family=Karla" rel="stylesheet">
+
     <style>
+
+        body {
+            background-color: #e1e1e1;
+            font-family: 'Karla', sans-serif;
+        }
         canvas {
             border: 1px solid #d3d3d3;
             background-color: #f1f1f1;
         }
+
+        #messagebox {
+            font-size: 15px;
+            text-align: justify; 
+            width: 480px; 
+            height: 100px; 
+            background-color: #fff;
+            padding: 10px;
+            top: 0%;
+        }
+
+        #controlbtns {
+            text-align: center; 
+            width: 480px;
+            margin: 0;
+            padding: 0;
+        }
+
     </style>
 
 </head>
-<body onload="startGame()" style="background-color: #00001a;">
+<body onload="startGame()">
+
     <script>
 
         var myGamePiece;
@@ -20,11 +46,15 @@
         var myBackground;
         var myScore;
         var myBonus;
+        var endMessage1;
+        var endMessage2;
 
         function startGame() {
             myGamePiece = new component(40, 40, "https://d30y9cdsu7xlg0.cloudfront.net/png/181451-200.png", 10, 120, "image");
             myScore = new component("15px", "Consolas", "black", 260, 20, "text");
             myBonus = new component("15px", "Consolas", "black", 400, 20, "text");
+            endMessage1 = new component("25px", "Karla", "black", 150, 100, "text");
+            endMessage2 = new component("25px", "Karla", "black", 150, 150, "text");
             //myBackground = new component(480, 270, "img/freiburg1.jpg", 0, 0, "background");
             //myObstacle = new component(10, 200, "green", 300, 120);
             myGameArea.start();
@@ -40,7 +70,7 @@
                 this.frameNo = 0; // a property for counting frames
                 this.bonusCount = 0;
                 this.oFreq = 150; // frequency of adding obstacles
-                this.oSpeedChange = -1; // speed of obstacles
+                this.speedChange = -1; // speed of obstacles and bonus elements
                 this.interval = setInterval(updateGameArea, 20); //the component is drawn and cleared 50 times per second
                 window.addEventListener('keydown', function(e) {
                     myGameArea.key = e.keyCode;
@@ -178,6 +208,11 @@
             for (i = 0; i < myObstacles.length; i++) {
                 if (myGamePiece.crashWith(myObstacles[i])) {
                     myGameArea.stop();
+                    myGameArea.clear();
+                    endMessage1.text = "Pontszám: " + myGameArea.frameNo;
+                    endMessage1.update();
+                    endMessage2.text = "Jel: " + myGameArea.bonusCount;                    
+                    endMessage2.update();
                     return;
                 }
             }
@@ -204,8 +239,8 @@
             // obstacles of random sizes added
             myGameArea.frameNo++;
 
-            if (myGameArea.frameNo % 2000 == 0) {
-                console.log("frameNo % 2000 == 1")
+            if (myGameArea.frameNo % 4000 == 0) {
+                console.log("frameNo % 4000 == 1")
                 myGameArea.oFreq /= 2;
                 console.log("myGameArea.oFreq: " + myGameArea.oFreq);
             }
@@ -245,7 +280,7 @@
                         y3 = 240;
                     }
                 
-                    myObstacles.push(new component(30, 30, "https://d30y9cdsu7xlg0.cloudfront.net/png/22850-200.png", x, y3, "image"));
+                    myObstacles.push(new component(30, 30, "http://downloadicons.net/sites/default/files/grandmor-icon-70273.png", x, y3, "image"));
                 }
 
                 // add fourth obstacle between first and second obstacle if fits
@@ -272,13 +307,13 @@
             
             // change speed of obtsacles in every given frame
             if (myGameArea.frameNo % 4000 == 0) {
-                myGameArea.oSpeedChange -= 0.3;
+                myGameArea.speedChange -= 0.3;
                 console.log("speed changed");
             }            
 
             // get and apply speed of obstacles
             for (i = 0; i < myObstacles.length; i++) {
-                myObstacles[i].speedX = myGameArea.oSpeedChange;
+                myObstacles[i].speedX = myGameArea.speedChange;
                 myObstacles[i].newPos();
                 myObstacles[i].update();
             }
@@ -288,7 +323,7 @@
             if (everyInterval(320)) {
                 bonusX = myGameArea.canvas.width;
                 minY = 10;
-                maxY = 260;
+                maxY = 240;
                 bonusY = Math.floor(Math.random() * (maxY - minY + 1) + minY);
 
                 if (myGameArea.frameNo % 640 == 0) {
@@ -306,7 +341,7 @@
 
             // move bonus elements
             for (i = 0; i < myBonuses.length; i++) {
-                myBonuses[i].speedX = -1;
+                myBonuses[i].speedX = myGameArea.speedChange;
                 myBonuses[i].newPos();
                 myBonuses[i].update();
             }
@@ -323,7 +358,6 @@
             myGamePiece.update();
 
             // stop myGamePiece when reaching edge
-
             if (myGamePiece.x < 0) {
                 myGamePiece.x += 1;
             }
@@ -403,11 +437,15 @@
             }*/
 
     </script>
-    <div style="text-align: center; width: 480px">
+
+    <div id="controlbtns">
         <button onmousedown="moveUp()" onmouseup="stopMove()" ontouchstart="moveUp()">UP</button><br/>
         <button onmousedown="moveLeft()" onmouseup="stopMove()" ontouchstart="moveLeft()">LEFT</button>
         <button onmousedown="moveRight()" onmouseup="stopMove()" ontouchstart="moveRight()">RIGHT</button><br/>
         <button onmousedown="moveDown()" onmouseup="stopMove()" ontouchstart="moveDown()">DOWN</button>
+    </div>
+    <div id="messagebox"">
+        <p id="message">Szegény Kripli úgy el van foglalva a kripliségével, hogy nem veszi észre a jeleket.<br/> Segíts neki összeszedni mindet, de közben kerüljétek el a többi kriplit!</p>
     </div>
 </body>
 </html>
