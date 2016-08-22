@@ -11,17 +11,20 @@
     </style>
 
 </head>
-<body onload="startGame()">
+<body onload="startGame()" style="background-color: #00001a;">
     <script>
 
         var myGamePiece;
         var myObstacles = [];
+        var myBonuses = [];
         var myBackground;
         var myScore;
+        var myBonus;
 
         function startGame() {
-            myGamePiece = new component(30, 30, "img/man.png", 10, 120, "image");
-            myScore = new component("20px", "Consolas", "black", 280, 40, "text");
+            myGamePiece = new component(40, 40, "https://d30y9cdsu7xlg0.cloudfront.net/png/181451-200.png", 10, 120, "image");
+            myScore = new component("15px", "Consolas", "black", 260, 20, "text");
+            myBonus = new component("15px", "Consolas", "black", 400, 20, "text");
             //myBackground = new component(480, 270, "img/freiburg1.jpg", 0, 0, "background");
             //myObstacle = new component(10, 200, "green", 300, 120);
             myGameArea.start();
@@ -35,7 +38,8 @@
                 this.context = this.canvas.getContext("2d");
                 document.body.insertBefore(this.canvas, document.body.childNodes[0]);
                 this.frameNo = 0; // a property for counting frames
-                this.oFreq = 300; // frequency of adding obstacles
+                this.bonusCount = 0;
+                this.oFreq = 150; // frequency of adding obstacles
                 this.oSpeedChange = -1; // speed of obstacles
                 this.interval = setInterval(updateGameArea, 20); //the component is drawn and cleared 50 times per second
                 window.addEventListener('keydown', function(e) {
@@ -115,13 +119,36 @@
                 var otherBottom = otherObj.y + (otherObj.height);
                 var crash = true;
 
+                // small correction added due to invisible background of images
+                if ((myBottom < (otherTop + 10)) || 
+                    (myTop > (otherBottom - 10)) || 
+                    (myRight < (otherLeft + 10)) ||
+                    (myLeft > (otherRight - 10))) {
+                    crash = false;
+                }
+                return crash;
+            }
+
+            this.bonusPick = function(otherObj) {
+
+                var myLeft = this.x;
+                var myRight = this.x + (this.width);
+                var myTop = this.y;
+                var myBottom = this.y + (this.height);
+                var otherLeft = otherObj.x;
+                var otherRight = otherObj.x + (otherObj.width);
+                var otherTop = otherObj.y;
+                var otherBottom = otherObj.y + (otherObj.height);
+                var pick = true;
+
                 if ((myBottom < otherTop) || 
                     (myTop > otherBottom) || 
                     (myRight < otherLeft) ||
                     (myLeft > otherRight)) {
-                    crash = false;
+                    pick = false;
                 }
-                return crash;
+                return pick;
+
             }
         }
 
@@ -144,7 +171,7 @@
             }
 
             // define variables
-            var x, height, gap, minHeight, maxHeight, minGap, maxGap;
+            var x, bonusX, bonusY, y1, y2, y3, y4, height, gap, minHeight, maxHeight, minGap, maxGap;
 
             // loop through every obstacle to see if there is a crash
             // If there is a crash, the updateGameArea function will stop, and no more drawing is done
@@ -152,6 +179,16 @@
                 if (myGamePiece.crashWith(myObstacles[i])) {
                     myGameArea.stop();
                     return;
+                }
+            }
+
+
+            // loop through every bonus too see if it picked
+
+            for (i = 0; i < myBonuses.length; i++) {
+                if (myGamePiece.bonusPick(myBonuses[i])) {
+                    myBonuses[i].x = -100;
+                    myGameArea.bonusCount++;
                 }
             }
 
@@ -163,51 +200,64 @@
             //myBackground.newPos();
             //myBackground.update();
 
-            // count frames and add an obstacle for every 150th frame 
+            // count frames and add an obstacle in every given frame 
             // obstacles of random sizes added
             myGameArea.frameNo++;
 
-            if (myGameArea.frameNo % 1000 == 1) {
-                console.log("frameNo % 1000 == 1")
+            if (myGameArea.frameNo % 2000 == 0) {
+                console.log("frameNo % 2000 == 1")
                 myGameArea.oFreq /= 2;
                 console.log("myGameArea.oFreq: " + myGameArea.oFreq);
             }
 
+            // ADD OBSTACLES
             if (myGameArea.frameNo == 1 || everyInterval(myGameArea.oFreq)) {
                 // with x defined like this, obstacles always start at the end of the canvas
                 x = myGameArea.canvas.width;
-                minHeight = 20;
-                maxHeight = 200;
-                height = Math.floor(Math.random() * (maxHeight - minHeight + 1) + minHeight);
 
                 minY = 10;
                 maxY = 50;
-                y = Math.floor(Math.random() * (maxY - minY + 1) + minY);
+                y1 = Math.floor(Math.random() * (maxY - minY + 1) + minY);
 
                 minGap = 70;
                 maxGap = 150;
                 gap = Math.floor(Math.random() * (maxGap - minGap + 1) + minGap);
                 //console.log("gap1: " + gap);
 
+                y2 = y1 + gap;
 
-                myObstacles.push(new component(30, 30, "img/man.png", x, y, "image"));
-                myObstacles.push(new component(30, 30, "img/man.png", x, y + gap, "image"));
+                myObstacles.push(new component(30, 30, "https://pixabay.com/static/uploads/photo/2012/04/24/12/13/disabled-39693_960_720.png", x, y1, "image"));
+                myObstacles.push(new component(30, 30, "https://d30y9cdsu7xlg0.cloudfront.net/png/22852-200.png", x, y2, "image"));
 
-                if (myGameArea.frameNo > 2000) {
+
+                // add bottom obstacle
+                if (myGameArea.frameNo > 1000) {
                     gap = Math.floor(Math.random() * (maxGap - minGap + 1) + minGap);
 
-                    var maxGap = y + gap + gap;
+                    // gap between 2nd and bottom obstacle (bottom obstacle position)
+                    y3 = y2 + gap;
 
-                    if (maxGap > 240) {
-                        maxGap = 240;
+                    if ((y3 - y2) < 35) {
+                        y3 = y2 + 35;
+                    }
+
+                    if (y3 > 240) {
+                        y3 = 240;
                     }
                 
-                    myObstacles.push(new component(30, 30, "img/man.png", x, maxGap, "image"));
+                    myObstacles.push(new component(30, 30, "https://d30y9cdsu7xlg0.cloudfront.net/png/22850-200.png", x, y3, "image"));
+                }
+
+                // add fourth obstacle between first and second obstacle if fits
+                y4 = (y1 + y2) / 2;
+
+                if (myGameArea.frameNo > 6000 && gap > 100) {
+                    myObstacles.push(new component(30, 30, "https://d30y9cdsu7xlg0.cloudfront.net/png/22850-200.png", x, y4, "image"));
                 }
 
 
                 /*
-
+                EXAMPLE SOLUTION:
                 x = myGameArea.canvas.width;
                 minHeight = 20;
                 maxHeight = 200;
@@ -220,22 +270,55 @@
                 */
             }
             
-            // change speed of obtsacles in every 1000 frame
-            if (myGameArea.frameNo % 1000 == 1) {
+            // change speed of obtsacles in every given frame
+            if (myGameArea.frameNo % 4000 == 0) {
                 myGameArea.oSpeedChange -= 0.3;
                 console.log("speed changed");
-            }
-            
-            
+            }            
 
+            // get and apply speed of obstacles
             for (i = 0; i < myObstacles.length; i++) {
                 myObstacles[i].speedX = myGameArea.oSpeedChange;
                 myObstacles[i].newPos();
                 myObstacles[i].update();
             }
 
+            // ADD BONUS ELEMENTS
+
+            if (everyInterval(320)) {
+                bonusX = myGameArea.canvas.width;
+                minY = 10;
+                maxY = 260;
+                bonusY = Math.floor(Math.random() * (maxY - minY + 1) + minY);
+
+                if (myGameArea.frameNo % 640 == 0) {
+                    myBonuses.push(new component(30, 30, "http://www.mindmegette.hu/img/zoldseghatarozo/kepek/0/42_fuge212x237.jpg", bonusX, bonusY, "image"));
+                } else if (myGameArea.frameNo % 960 == 0 && myGameArea.frameNo % 640 != 0) {                    
+                    myBonuses.push(new component(30, 30, "http://www.beer100.com/images/beermug.jpg", bonusX, bonusY, "image"));
+                } else if (myGameArea.frameNo % 1600 == 0 && myGameArea.frameNo % 640 != 0 && myGameArea.frameNo % 960 != 0) {                    
+                    myBonuses.push(new component(30, 30, "http://cdn.mysitemyway.com/etc-mysitemyway/icons/legacy-previews/icons/simple-red-glossy-icons-business/086691-simple-red-glossy-icon-business-binocular.png", bonusX, bonusY, "image"));
+                } else {
+                    myBonuses.push(new component(30, 30, "https://pixabay.com/static/uploads/photo/2013/07/12/18/47/bicycle-153878_960_720.png", bonusX, bonusY, "image"));
+                }
+
+                
+            }
+
+            // move bonus elements
+            for (i = 0; i < myBonuses.length; i++) {
+                myBonuses[i].speedX = -1;
+                myBonuses[i].newPos();
+                myBonuses[i].update();
+            }
+
+
+            // put text on canvas
             myScore.text = "Pontszám: " + myGameArea.frameNo;
             myScore.update();
+            myBonus.text = "Jel: " + myGameArea.bonusCount;
+            myBonus.update();
+
+            // move myGamePiece
             myGamePiece.newPos(); // newPos() called before drawing the component
             myGamePiece.update();
 
