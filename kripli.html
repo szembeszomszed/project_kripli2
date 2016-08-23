@@ -26,7 +26,7 @@
         }
         canvas {
             border: 1px solid #d3d3d3;
-            background-color: #f1f1f1;
+            background-color: #fff;
         }
 
         #messagebox {
@@ -35,7 +35,7 @@
             width: 480px; 
             height: 100px; 
             background-color: #fff;
-            padding: 10px;
+            padding: 10px 20px;
             margin-top: 1%;
             border: 1px solid #000;
         }
@@ -53,22 +53,24 @@
         }
 
         #reloadbtn {
-            color: #009933;
-            background-color: #e6ffee;
-            transition: color 1s, background 2s;
-            margin-top: 5%;
+            width: 105px;
+            height: 50px;
+            padding: 0; 
+            font-size: 18px;
+            border-radius: 5px;
+            color: #fff;
+            background-color: rgba(0, 153, 51, 0.7);
+            margin-top: 2%;
         }
 
         #reloadbtn:hover {
             color: #fff;
             background-color: #009933;
-            transition: color 1s, background 2s;
+            transition: color .5s, background 1s;
         }
 
         #reloadbtn:focus {
             outline: 0;
-            color: #fff;
-            background-color: #009933;
         }
 
     </style>
@@ -484,10 +486,10 @@
         
     </div>
     <div id="messagebox"">
-        <p id="message">Szegény Kripli úgy el van foglalva a kripliségével, hogy nem veszi észre a jeleket.<br/> Segíts neki összeszedni mindet, de ügyeljetek rá, hogy közben elkerüljétek a többi kriplit!</p>
+        <p id="message">Szegény Kripli úgy el van foglalva a kripliségével, hogy nem veszi észre a jeleket. Segíts neki összeszedni minél többet: keressétek a sört, a biciklit, a fügét és a távcsövet! Persze közben ügyeljetek rá, hogy ne találkozzatok a többi kriplivel!</p>
     </div>
     <div id="reload">
-        <button id="reloadbtn" class="btn" onclick="window.location.reload()">Rajta!</button>
+        <button id="reloadbtn" class="btn" onclick="window.location.reload()">Újra!</button>
     </div>
 </body>
 </html>
