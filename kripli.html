@@ -33,7 +33,7 @@
             font-size: 15px;
             text-align: justify; 
             width: 480px; 
-            height: 100px; 
+            height: 130px; 
             background-color: #fff;
             padding: 10px 20px;
             margin-top: 1%;
@@ -86,13 +86,15 @@
         var myBackground;
         var myScore;
         var myBonus;
+        var myTimer;
         var endMessage1;
         var endMessage2;
 
         function startGame() {
             myGamePiece = new component(40, 40, "https://d30y9cdsu7xlg0.cloudfront.net/png/181451-200.png", 10, 120, "image");
-            myScore = new component("15px", "Consolas", "black", 260, 20, "text");
-            myBonus = new component("15px", "Consolas", "black", 400, 20, "text");
+            myScore = new component("15px", "Consolas", "black", 160, 20, "text");
+            myBonus = new component("15px", "Consolas", "black", 300, 20, "text");
+            myTimer = new component("15px", "Consolas", "black", 390, 20, "text");
             endMessage1 = new component("25px", "Karla", "black", 150, 100, "text");
             endMessage2 = new component("25px", "Karla", "black", 150, 150, "text");
             //myBackground = new component(480, 270, "img/freiburg1.jpg", 0, 0, "background");
@@ -109,6 +111,7 @@
                 document.body.insertBefore(this.canvas, document.body.childNodes[0]);
                 this.frameNo = 0; // a property for counting frames
                 this.bonusCount = 0;
+                this.countdown = 20;
                 this.oFreq = 150; // frequency of adding obstacles
                 this.speedChange = -1; // speed of obstacles and bonus elements
                 this.interval = setInterval(updateGameArea, 20); //the component is drawn and cleared 50 times per second
@@ -190,10 +193,10 @@
                 var crash = true;
 
                 // small correction added due to invisible background of images
-                if ((myBottom < (otherTop + 10)) || 
-                    (myTop > (otherBottom - 10)) || 
-                    (myRight < (otherLeft + 10)) ||
-                    (myLeft > (otherRight - 10))) {
+                if ((myBottom < (otherTop + 9)) || 
+                    (myTop > (otherBottom - 9)) || 
+                    (myRight < (otherLeft + 9)) ||
+                    (myLeft > (otherRight - 9))) {
                     crash = false;
                 }
                 return crash;
@@ -244,7 +247,7 @@
             var x, bonusX, bonusY, y1, y2, y3, y4, height, gap, minHeight, maxHeight, minGap, maxGap;
 
             // loop through every obstacle to see if there is a crash
-            // If there is a crash, the updateGameArea function will stop, and no more drawing is done
+            // If there is a crash, the updateGameArea function will stop, and no more drawing is done - GAME OVER
             for (i = 0; i < myObstacles.length; i++) {
                 if (myGamePiece.crashWith(myObstacles[i])) {
                     myGameArea.stop();
@@ -257,13 +260,36 @@
                 }
             }
 
+            // if countdown == 0, GAME OVER
+
+            if (myGameArea.countdown == 0) {
+                myGameArea.stop();
+                myGameArea.clear();
+                endMessage1.text = "Pontszám: " + myGameArea.frameNo;
+                endMessage1.update();
+                endMessage2.text = "Jel: " + myGameArea.bonusCount;                    
+                endMessage2.update();
+                return;
+            }
+
 
             // loop through every bonus too see if it picked
+            // also set countdown back to the given value
 
             for (i = 0; i < myBonuses.length; i++) {
                 if (myGamePiece.bonusPick(myBonuses[i])) {
                     myBonuses[i].x = -100;
                     myGameArea.bonusCount++;
+                    myGameArea.countdown = 20;
+
+                    if (myGameArea.frameNo >= 2000) {
+                        myGameArea.countdown = 15;
+                    } else if (myGameArea.frameNo >= 5000) {
+                        myGameArea.countdown = 10;
+                    } else if (myGameArea.frameNo >= 8000) {
+                        myGameArea.countdown = 5;
+                    }
+
                 }
             }
 
@@ -386,12 +412,19 @@
                 myBonuses[i].update();
             }
 
+            // timer goes down in every second
+            if (everyInterval(50)) {
+                myGameArea.countdown--;
+            }
+
 
             // put text on canvas
             myScore.text = "Pontszám: " + myGameArea.frameNo;
             myScore.update();
             myBonus.text = "Jel: " + myGameArea.bonusCount;
             myBonus.update();
+            myTimer.text = "Idő: " + myGameArea.countdown;
+            myTimer.update();
 
             // move myGamePiece
             myGamePiece.newPos(); // newPos() called before drawing the component
@@ -418,7 +451,9 @@
 
         // The everyInterval function returns true if the current framenumber corresponds with the given interval.
         function everyInterval(n) {
-            if ((myGameArea.frameNo / n) % 1 == 0) {return true;}
+            if ((myGameArea.frameNo / n) % 1 == 0) {
+                return true;
+            }
             return false;
         }
 
@@ -486,7 +521,7 @@
         
     </div>
     <div id="messagebox"">
-        <p id="message">Szegény Kripli úgy el van foglalva a kripliségével, hogy nem veszi észre a jeleket. Segíts neki összeszedni minél többet: keressétek a sört, a biciklit, a fügét és a távcsövet! Persze közben ügyeljetek rá, hogy ne találkozzatok a többi kriplivel!</p>
+        <p id="message">Szegény Kripli úgy el van foglalva a kripliségével, hogy nem veszi észre a jeleket. Segíts neki időben összeszedni minél többet: keressétek a sört, a biciklit, a fügét és a távcsövet! Persze közben ügyeljetek rá, hogy ne találkozzatok a többi kriplivel!</p>
     </div>
     <div id="reload">
         <button id="reloadbtn" class="btn" onclick="window.location.reload()">Újra!</button>
