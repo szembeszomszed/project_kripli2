@@ -3,6 +3,8 @@
 <head>
 
     <meta charset="utf-8" name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+    <!-- Font -->
     <link href="https://fonts.googleapis.com/css?family=Karla" rel="stylesheet">
 
     <!-- Latest compiled and minified CSS -->
@@ -87,16 +89,18 @@
         var myScore;
         var myBonus;
         var myTimer;
-        var endMessage1;
+        var endMessage1
         var endMessage2;
+        var endMessage3;
 
         function startGame() {
             myGamePiece = new component(40, 40, "https://d30y9cdsu7xlg0.cloudfront.net/png/181451-200.png", 10, 120, "image");
             myScore = new component("15px", "Consolas", "black", 160, 20, "text");
             myBonus = new component("15px", "Consolas", "black", 300, 20, "text");
             myTimer = new component("15px", "Consolas", "black", 390, 20, "text");
-            endMessage1 = new component("25px", "Karla", "black", 150, 100, "text");
-            endMessage2 = new component("25px", "Karla", "black", 150, 150, "text");
+            endMessage1 = new component("25px", "Consolas", "black", 120, 80, "text");
+            endMessage2 = new component("25px", "Consolas", "black", 120, 130, "text");
+            endMessage3 = new component("25px", "Consolas", "black", 120, 180, "text");
             //myBackground = new component(480, 270, "img/freiburg1.jpg", 0, 0, "background");
             //myObstacle = new component(10, 200, "green", 300, 120);
             myGameArea.start();
@@ -252,10 +256,12 @@
                 if (myGamePiece.crashWith(myObstacles[i])) {
                     myGameArea.stop();
                     myGameArea.clear();
-                    endMessage1.text = "Pontszám: " + myGameArea.frameNo;
+                    endMessage1.text = "Jaj, a kriplik!";
                     endMessage1.update();
-                    endMessage2.text = "Jel: " + myGameArea.bonusCount;                    
+                    endMessage2.text = "Pontszám: " + myGameArea.frameNo;
                     endMessage2.update();
+                    endMessage3.text = "Összegyűjtött jel: " + myGameArea.bonusCount;                    
+                    endMessage3.update();
                     return;
                 }
             }
@@ -265,10 +271,12 @@
             if (myGameArea.countdown == 0) {
                 myGameArea.stop();
                 myGameArea.clear();
-                endMessage1.text = "Pontszám: " + myGameArea.frameNo;
+                endMessage1.text = "Jaj, lejárt az idő!";
                 endMessage1.update();
-                endMessage2.text = "Jel: " + myGameArea.bonusCount;                    
+                endMessage2.text = "Pontszám: " + myGameArea.frameNo;
                 endMessage2.update();
+                endMessage3.text = "Összegyűjtött jel: " + myGameArea.bonusCount;                    
+                endMessage3.update();
                 return;
             }
 
