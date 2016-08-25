@@ -25,7 +25,7 @@
     <style>
 
         body {
-            background-color: #e1e1e1;
+            background-color: #191931;
             font-family: 'Karla', sans-serif;
         }
         canvas {
@@ -42,6 +42,7 @@
             padding: 10px 20px;
             margin-top: 1%;
             border: 1px solid #000;
+            border-radius: 5px;
         }
 
         #controlbtns {
@@ -49,6 +50,15 @@
             width: 480px;
             margin: 0;
             padding: 0;
+        }
+
+        .ctrlbtn {
+            width: 50px;
+            height: 50px;
+        }
+
+        .ctrlbtn:focus {
+            outline: 0;
         }
 
         #reload {
@@ -75,6 +85,10 @@
 
         #reloadbtn:focus {
             outline: 0;
+        }
+
+        span {
+            color: red;
         }
 
     </style>
@@ -187,6 +201,7 @@
                 }
             }
 
+            // crashcheck
             this.crashWith = function(otherObj) {
                 var myLeft = this.x;
                 var myRight = this.x + (this.width);
@@ -208,6 +223,7 @@
                 return crash;
             }
 
+            // bonuscheck
             this.bonusPick = function(otherObj) {
 
                 var myLeft = this.x;
@@ -365,20 +381,6 @@
                 if (myGameArea.frameNo > 6000 && gap > 100) {
                     myObstacles.push(new component(30, 30, "https://d30y9cdsu7xlg0.cloudfront.net/png/22850-200.png", x, y4, "image"));
                 }
-
-
-                /*
-                EXAMPLE SOLUTION:
-                x = myGameArea.canvas.width;
-                minHeight = 20;
-                maxHeight = 200;
-                height = Math.floor(Math.random() * (maxHeight - minHeight + 1) + minHeight);
-                minGap = 50;
-                maxGap = 200;
-                gap = Math.floor(Math.random() * (maxGap - minGap + 1) + minGap);
-                myObstacles.push(new component(10, height, "green", x, 0));
-                myObstacles.push(new component(10, x - height - gap, "green", x, height + gap));
-                */
             }
             
             // change speed of obtsacles in every given frame
@@ -422,7 +424,7 @@
                 myBonuses[i].update();
             }
 
-            // timer goes down in every second
+            // timer decreased in every second
             if (everyInterval(50)) {
                 myGameArea.countdown--;
             }
@@ -488,50 +490,17 @@
             myGamePiece.speedY = 0;
         }
 
-
-
-        /*
-
-            // if crashWith returns true, the stop method is called
-            if (myGamePiece.crashWith(myObstacle)) {
-                
-                myGameArea.stop();
-
-            } else {
-
-                myGameArea.clear(); // without the clear() method, all movements of the component will leave a trail of where it was positioned in the last frame
-
-           
-
-                myObstacle.x -= 1; // moving obstacle at every update
-
-                myObstacle.update();
-                myGamePiece.newPos(); // newPos() called before drawing the component
-                myGamePiece.update();
-
-                
-                redGamePiece.x++;
-                yellowGamePiece.x++;
-                yellowGamePiece.y++;
-                blueGamePiece.x++;
-                blueGamePiece.y++;
-                redGamePiece.update();
-                yellowGamePiece.update(); 
-                blueGamePiece.update();
-                
-            }*/
-
     </script>
 
     <div id="controlbtns">
-        <button onmousedown="moveUp()" onmouseup="stopMove()" ontouchstart="moveUp()"><i class="fa fa-arrow-up" aria-hidden="true"></i></button><br/>
-        <button onmousedown="moveLeft()" onmouseup="stopMove()" ontouchstart="moveLeft()"><i class="fa fa-arrow-left" aria-hidden="true"></i></button>
-        <button onmousedown="moveDown()" onmouseup="stopMove()" ontouchstart="moveDown()"><i class="fa fa-arrow-down" aria-hidden="true"></i></button>
-        <button onmousedown="moveRight()" onmouseup="stopMove()" ontouchstart="moveRight()"><i class="fa fa-arrow-right" aria-hidden="true"></i></button><br/>
+        <button onmousedown="moveUp()" onmouseup="stopMove()" ontouchstart="moveUp()" class="ctrlbtn"><i class="fa fa-arrow-up" aria-hidden="true"></i></button><br/>
+        <button onmousedown="moveLeft()" onmouseup="stopMove()" ontouchstart="moveLeft()" class="ctrlbtn"><i class="fa fa-arrow-left" aria-hidden="true"></i></button>
+        <button onmousedown="moveDown()" onmouseup="stopMove()" ontouchstart="moveDown()" class="ctrlbtn"><i class="fa fa-arrow-down" aria-hidden="true"></i></button>
+        <button onmousedown="moveRight()" onmouseup="stopMove()" ontouchstart="moveRight()" class="ctrlbtn"><i class="fa fa-arrow-right" aria-hidden="true"></i></button><br/>
         
     </div>
-    <div id="messagebox"">
-        <p id="message">Szegény Kripli úgy el van foglalva a kripliségével, hogy nem veszi észre a jeleket. Az idő csak fogy, úgyhogy segítened kell neki összeszedni minél többet: keressétek a sört, a biciklit, a fügét és a távcsövet! Közben ügyeljetek rá, hogy ne találkozzatok a többi kriplivel! <br/> Ja, és persze boldog szülinapot! :)</p>
+    <div id="messagebox">
+        <p id="message">Szegény Kripli úgy el van foglalva a kripliségével, hogy nem veszi észre a jeleket. Az idő csak fogy, úgyhogy segítened kell neki összeszedni minél többet: keressétek a sört, a biciklit, a fügét és a távcsövet! Közben ügyeljetek rá, hogy ne találkozzatok a többi kriplivel! <br/> <span>És persze boldog szülinapot! :)</span></p>
     </div>
     <div id="reload">
         <button id="reloadbtn" class="btn" onclick="window.location.reload()">Újra!</button>
